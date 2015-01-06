@@ -1,0 +1,35 @@
+extends layout
+
+block content
+	h1= title
+	p This is not ready.
+	form(method="POST")
+		p First Name:
+		input(type="text", name="firstname", value="Bearcat")
+		p Last Name:
+		input(type="text", name="lastname", value="Prime")
+		p Tutorial Teacher:
+		input(type="text", name="teacher", value="Appleman")
+		p Student ID:
+		input(type="text", name="sid", value="1234567")
+		input(type="submit", value="Submit")
+	ul
+		table(border="1",style="width:100%")
+			tr
+				td
+					p First Name
+				td
+					p Last Name
+				td
+					p Teacher
+			each request in arr
+				tr
+					td
+						p=request.firstname
+					td
+						p=request.lastname
+					td
+						p=request.tutorial
+					td
+						form(method="POST")
+							button(name="az")
