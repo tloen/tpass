@@ -8,20 +8,30 @@ block content
 		input(type="text", name="firstname", value="Bearcat")
 		p Last Name:
 		input(type="text", name="lastname", value="Prime")
-		p Tutorial Teacher:
-		input(type="text", name="teacher", value="Appleman")
+		p Homeroom Teacher:
+		input(type="text", name="homeroom", value="Appleman")
+		p Alternate Teacher:
+		input(type="text", name="alternate", value="Appleman")
 		p Student ID:
 		input(type="text", name="sid", value="1234567")
-		input(type="submit", value="Submit")
+		input(type="submit", value="Submit", name="record")
 	ul
 		table(border="1",style="width:100%")
 			tr
 				td
-					p First Name
+					p First
 				td
-					p Last Name
+					p Last
 				td
-					p Teacher
+					p Homeroom
+				td
+					p Alternate
+				td
+					p Student ID
+				td
+					p Approve
+				td
+					p Deny
 			each request in arr
 				tr
 					td
@@ -29,7 +39,14 @@ block content
 					td
 						p=request.lastname
 					td
-						p=request.tutorial
+						p=request.homeroom
+					td
+						p=request.alternate
+					td
+						p=request.sid
+					td
+						form(method="POST")
+							input(type="submit", name="test", value="test2")
 					td
 						form(method="POST")
 							button(name="az")
