@@ -1,0 +1,1 @@
+set DEBUG=tpass & nodemon .\bin\www

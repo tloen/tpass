@@ -1,45 +1,76 @@
 var express = require('express');
 var router = express.Router();
-var MongoClient = require('mongodb').MongoClient;
+var Db = require('mongodb').Db,
+    MongoClient = require('mongodb').MongoClient,
+    Server = require('mongodb').Server,
+    ReplSetServers = require('mongodb').ReplSetServers,
+    ObjectID = require('mongodb').ObjectID,
+    Binary = require('mongodb').Binary,
+    GridStore = require('mongodb').GridStore,
+    Grid = require('mongodb').Grid,
+    Code = require('mongodb').Code,
+    BSON = require('mongodb').pure().BSON,
+    assert = require('assert');
 
 /* GET home page. */
+
+function dbDraw(col, res) {
+	col.find().toArray(function(err, items) {
+		res.render('index', { title: "Tutorial Pass, Yo" , arr: items });
+	});
+	console.log("dbDraw function called");
+}
+
 router.get('/', function(req, res) {
-  var col=[{firstname:"fail"}];
-  MongoClient.connect("mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb", function(err, db) {
-    if(!err) {
-      console.log("Connection is working");
-	  var collection = db.collection('students');
-	  collection.find().toArray(function(err, items) {
-	    col = items;
-		res.render('index', { title: "Tutorial Pass, Yo" , arr: col });
-		console.log(items); });
-    }
-	else console.log("Connection failed!");
-  });
-  console.log(col);
+	MongoClient.connect("mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb", function(err, db) {
+		if(!err) {
+			console.log("Connection is working");
+			var collection = db.collection('students');
+			collection.find().toArray(function(err, items) {
+				res.render('index', { title: "Tutorial Pass, Yo" , arr: items });
+			});
+		}
+		else console.log("Connection failed!");
+	});
 });
 
 router.post('/', function(req, res) {
 	console.log(req.body)
-	var col;
-	if("record" in req.body) {
-		MongoClient.connect("mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb", function(err, db) {
-			if(!err) {
-				console.log("We are connected");
-				var collection = db.collection('students');
-				collection.insert({
-					"firstname":req.body.firstname,
-					"lastname":req.body.lastname,
-					"homeroom":req.body.homeroom,
-					"alternate":req.body.alternate,
-					"sid":req.body.sid
-				}, {w:1}, function(err, result) {});
-				collection.find().toArray(function(err, items) {
-				col = items;
-				res.render('index', { title: "Tutorial Pass, Yo" , arr: col });
-				console.log(items); });
-			}
-		});
+	switch(req.body.pass_action) {
+		case "Submit":
+			MongoClient.connect("mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb", function(err, db) {
+				if(!err) {
+					var collection = db.collection('students');
+					collection.insert({
+						"firstname":req.body.firstname,
+						"lastname":req.body.lastname,
+						"homeroom":req.body.homeroom,
+						"alternate":req.body.alternate,
+						"sid":req.body.sid
+					}, {w:1}, function(err, result) {});
+					dbDraw(collection, res);
+				}
+			});
+			break;
+		case "Deny":
+			MongoClient.connect("mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb", function(err, db) {
+				if(!err) {
+					var collection = db.collection('students');
+					collection.remove({"_id":ObjectID(req.body.id)},{justOne:true},function(err,result){
+						console.log("Complete!");
+					});
+					dbDraw(collection, res);
+				}
+			});
+			break;
+		default:
+			MongoClient.connect("mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb", function(err, db) {
+				if(!err) {
+					var collection = db.collection('students');
+					dbDraw(collection, res);
+				}
+			});
+			console.log("Pass_action " + req.body.pass_action + " not implemented yet!");
 	}
 });
 

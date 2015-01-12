@@ -14,7 +14,7 @@ block content
 		input(type="text", name="alternate", value="Appleman")
 		p Student ID:
 		input(type="text", name="sid", value="1234567")
-		input(type="submit", value="Submit", name="record")
+		input(type="submit", name="pass_action", value="Submit")
 	ul
 		table(border="1",style="width:100%")
 			tr
@@ -46,7 +46,9 @@ block content
 						p=request.sid
 					td
 						form(method="POST")
-							input(type="submit", name="test", value="test2")
+							input(type="hidden", name="id", value=request._id)
+							input(type="submit", name="pass_action", value="Accept")
 					td
 						form(method="POST")
-							button(name="az")
+							input(type="hidden", name="id", value=request._id)
+							input(type="submit", name="pass_action", value="Deny")
