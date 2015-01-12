@@ -10,7 +10,8 @@ var Db = require('mongodb').Db,
     Grid = require('mongodb').Grid,
     Code = require('mongodb').Code,
     BSON = require('mongodb').pure().BSON,
-    assert = require('assert');
+    assert = require('assert'),
+	passport = require('passport');
 
 /* GET home page. */
 
@@ -20,6 +21,9 @@ function dbDraw(col, res) {
 	});
 	console.log("dbDraw function called");
 }
+
+router.post('/login', passport.authenticate('local', { successRedirect: '/',
+                                                    failureRedirect: '/login' }));
 
 router.get('/', function(req, res) {
 	MongoClient.connect("mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb", function(err, db) {

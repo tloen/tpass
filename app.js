@@ -27,6 +27,7 @@ app.use('/', routes);
 app.use('/teacher-login', routes);
 app.use('/users', users);
 //app.use('/login', login);
+app.use('/login', routes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
