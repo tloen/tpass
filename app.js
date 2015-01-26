@@ -10,6 +10,23 @@ var users = require('./routes/users');
 
 var app = express();
 
+var mongoose = require('mongoose');
+var studentSchema = new Schema({
+    firstName: String,
+    lastName: String,
+    studentID: String,
+    homeroom: String,
+    grade: Number
+});
+mongoose.connect('mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb');
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function (callback) {
+    // yay!
+});
+
+var userScheme = new S
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
