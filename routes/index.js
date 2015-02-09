@@ -30,14 +30,6 @@ passport.use(new LocalStrategy(
 	}
 ));
 
-passport.serializeUser(function(user, done) {
-  done(null, user);
-});
- 
-passport.deserializeUser(function(user, done) {
-  done(null, user);
-});
-
 router.post('/login',
   passport.authenticate('local', {
     successRedirect: '/loginSuccess',
