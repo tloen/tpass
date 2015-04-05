@@ -10,9 +10,7 @@ var Db = require('mongodb').Db,
     Grid = require('mongodb').Grid,
     Code = require('mongodb').Code,
     BSON = require('mongodb').pure().BSON,
-    assert = require('assert'),
-	passport = require('passport'),
-	LocalStrategy = require('passport-local').Strategy;
+    assert = require('assert');
 
 /* GET home page. */
 
@@ -23,32 +21,6 @@ function dbDraw(col, res) {
 	console.log("dbDraw function called");
 }
 
-passport.use(new LocalStrategy(
-	function(username, password, done) {
-		//BAD, CHANGE ASAP
-		return done(null, user);
-	}
-));
-
-router.post('/login',
-  passport.authenticate('local', {
-    successRedirect: '/loginSuccess',
-    failureRedirect: '/loginFailure'
-  })
-);
-
-router.get('/loginFailure', function(req, res, next) {
-  res.send('Failed to authenticate');
-});
-
-router.get('/loginSuccess', function(req, res, next) {
-  res.send('Successfully authenticated');
-});
-
-router.get('/login', function(req, res) {
-    res.render('login');
-});
-													
 router.get('/', function(req, res) {
 	MongoClient.connect("mongodb://bearcatprime:196884@ds031271.mongolab.com:31271/tpassdb", function(err, db) {
 		if(!err) {
