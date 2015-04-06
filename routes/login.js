@@ -6,25 +6,22 @@ var router = express.Router();
 var passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy;
 
-// okay, the following code is copied from the website 
-// http://passportjs.org/guide/username-password/
-var passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy;
-
-router.post('/login',
+router.post('/',
+    passport.authenticate('local',
+    {
+        failureRedirect: '/fail',
+        successRedirect: '/win',
+        failureFlash: true
+    }),
     function (req, res) {
-        console.log('login request recieved from ', req.param('username'), req.param('password'));
-        debugger;
-        passport.authenticate('local', {
-            successRedirect: '/win',
-            failureRedirect: '/fail'
-        })
+        res.redirect('/');
     }
 );
 
+
 //(end of copying)
 
-router.get('/login',
+router.get('/',
     function (req, res) {
         console.log('okay');
         res.render('login');
