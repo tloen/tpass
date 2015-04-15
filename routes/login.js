@@ -10,7 +10,7 @@ router.post('/',
     passport.authenticate('local',
     {
         failureRedirect: '/fail',
-        successRedirect: '/win',
+        successRedirect: '/dashboard',
         failureFlash: true
     }),
     function (req, res) {
@@ -27,13 +27,5 @@ router.get('/',
         res.render('login');
     }
 );
-
-router.get('/win', function (req, res, next) {
-    res.send('yes');
-});
-
-router.get('/fail', function (req, res, next) {
-    res.send('no');
-});
 
 module.exports = router;

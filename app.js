@@ -91,6 +91,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/login', login);
 app.use('/', route);
 
+//handlers!
+
+app.get('/dashboard', function (req, res) {
+    res.render('user', {'user' : req.user, 'request_filed' : false});
+});
+
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');

@@ -1,0 +1,15 @@
+extends layout
+
+block content
+	h1= title
+	p This is not ready.
+
+	if !request_filed
+		form(method="POST")
+			p="Username: "+user.username
+			p Alternate Teacher:
+			input(type="text", name="alternate", value="Appleman")
+			input(type="submit", name="pass_action", value="Submit")
+		ul
+
+	//else
