@@ -24,16 +24,29 @@ var db = require('./db')
 mongoose.connect(db.url);
 var Schema = mongoose.Schema;
 var UserDetail = new Schema(
-    { username: String, password: String },
-    { collection: 'users'});
+    {
+        username: String, 
+        password: String,
+        request_id: Schema.Types.ObjectId
+    },
+    { collection: 'users' });
 var User = mongoose.model('users', UserDetail);
 
+var RequestDetail = new Schema(
+    {
+        user_id: Schema.Types.ObjectId,
+        teacher_id: Schema.Types.ObjectId,
+        date: Date
+    },
+    { collection: 'requests' }
+);
+var Request = mongoose.model('requests', RequestDetail)
 
 
 // passport session setup
 passport.serializeUser(function (user, done) {
     console.log('serializeUser called');
-    done(null, user.id);
+    done(null, user);
 });
 
 passport.deserializeUser(function (id, done) {
@@ -94,7 +107,31 @@ app.use('/', route);
 //handlers!
 
 app.get('/dashboard', function (req, res) {
-    res.render('user', {'user' : req.user, 'request_filed' : false});
+    res.render('user', { 'user' : req.user, 'request_filed' : false });
+    console.log(req.user);
+});
+
+app.post('/dashboard', function (req, res) {
+    //file the new request
+    var pending = new Request({
+        'user_id': req.user._id,
+        //'teacher_id': "",
+        'date': new Date()
+    });
+    pending.save(function (err) {
+        if (err) return console.error(err);
+    });
+    //put the request on the user's record
+    User.update(
+        { '_id': req.user._id }, 
+        { $set: { 'request_id': pending._id } },
+        function (err) {
+            if (err) return console.error(err);
+        }
+    );
+    var teacher = req.body.alternate;
+
+    res.render('user', { 'user' : req.user, 'request_filed' : false });
 });
 
 
