@@ -1,15 +1,18 @@
 extends layout
 
 block content
-	h1= title
-	p This is not ready.
+    h1= title
+    p This is not ready.
+    p="Username: "+user.username
 
-	if !request_filed
-		form(method="POST")
-			p="Username: "+user.username
-			p Alternate Teacher:
-			input(type="text", name="alternate", value="Appleman")
-			input(type="submit", name="pass_action", value="Submit")
-		ul
+    if !request_filed
+        form(method="POST")
+            p Alternate Teacher:
+            input(type="text", name="alternate", value="Appleman")
+            input(type="submit", name="pass_action", value="Submit")
+        ul
 
-	//else
+    else
+        form(method="POST")
+            p="Current request filed "+request.date
+            p="Alternate Teacher: "+request.teacher_id

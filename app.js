@@ -23,15 +23,17 @@ var db = require('./db')
 // mongoose [http://www.sitepoint.com/local-authentication-using-passport-node-js/]
 mongoose.connect(db.url);
 var Schema = mongoose.Schema;
+
+//defining schemata
 var UserDetail = new Schema(
     {
+        name: String,
         username: String, 
         password: String,
+        requestActive: Boolean,
         request_id: Schema.Types.ObjectId
     },
     { collection: 'users' });
-var User = mongoose.model('users', UserDetail);
-
 var RequestDetail = new Schema(
     {
         user_id: Schema.Types.ObjectId,
@@ -40,7 +42,21 @@ var RequestDetail = new Schema(
     },
     { collection: 'requests' }
 );
-var Request = mongoose.model('requests', RequestDetail)
+var TeacherDetail = new Schema(
+    {
+        name: String,
+        username: String,
+        password: String,
+        requestIds: [Schema.Types.ObjectId]
+    },
+    { collection: 'teachers' }
+);
+
+
+var User = mongoose.model('users', UserDetail);
+var Request = mongoose.model('requests', RequestDetail);
+var Teacher = mongoose.model('requests', TeacherDetail);
+
 
 
 // passport session setup
@@ -107,7 +123,18 @@ app.use('/', route);
 //handlers!
 
 app.get('/dashboard', function (req, res) {
-    res.render('user', { 'user' : req.user, 'request_filed' : false });
+    if (req.user.active_request) {
+        var request = Request.findById(req.user._id);
+        res.render('user', {
+            'user' : req.user, 
+            'request_filed' : false,
+            'request' : request
+        });
+    }
+    else res.render('user', {
+        'user' : req.user, 
+        'request_filed' : false
+    });
     console.log(req.user);
 });
 
@@ -121,6 +148,7 @@ app.post('/dashboard', function (req, res) {
     pending.save(function (err) {
         if (err) return console.error(err);
     });
+
     //put the request on the user's record
     User.update(
         { '_id': req.user._id }, 
@@ -129,9 +157,11 @@ app.post('/dashboard', function (req, res) {
             if (err) return console.error(err);
         }
     );
-    var teacher = req.body.alternate;
+    
+    //tell the teacher
+    //var teacher = 
 
-    res.render('user', { 'user' : req.user, 'request_filed' : false });
+    res.render('user', { 'user' : req.user, 'request_filed' : true, 'request' : pending });
 });
 
 
