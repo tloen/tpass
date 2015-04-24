@@ -171,10 +171,10 @@ app.post('/dashboard', function (req, res) {
     );
     
     //tell the teacher
-    Teacher.update({ _id: id }, { $push: { 'requestIds' : teacherId } }, function (err, raw) {
+    Teacher.update({ _id: teacherId }, { $push: { 'requestIds' : teacherId } }, function (err, raw) {
         return console.error(err);
     });
-    res.render('user', { 'user' : req.user, 'request_filed' : true, 'request' : pending, 'teachers' : teachers });
+    res.render('user', { 'user' : req.user, 'request_filed' : true, 'request' : pending });
 });
 
 
