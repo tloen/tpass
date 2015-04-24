@@ -55,7 +55,7 @@ var TeacherDetail = new Schema(
 
 var User = mongoose.model('users', UserDetail);
 var Request = mongoose.model('requests', RequestDetail);
-var Teacher = mongoose.model('requests', TeacherDetail);
+var Teacher = mongoose.model('teachers', TeacherDetail);
 
 
 
@@ -65,9 +65,9 @@ passport.serializeUser(function (user, done) {
     done(null, user);
 });
 
-passport.deserializeUser(function (id, done) {
+passport.deserializeUser(function (user, done) {
     console.log('deserializeUser called');
-    User.findById(id, function (err, user) {
+    User.findById(user._id, function (err, user) {
         done(err, user);
     });
 });
@@ -123,26 +123,38 @@ app.use('/', route);
 //handlers!
 
 app.get('/dashboard', function (req, res) {
-    if (req.user.active_request) {
-        var request = Request.findById(req.user._id);
-        res.render('user', {
-            'user' : req.user, 
-            'request_filed' : false,
-            'request' : request
-        });
-    }
-    else res.render('user', {
-        'user' : req.user, 
-        'request_filed' : false
+    Teacher.find({}, function (err, teachers) {
+        if (err) {
+            return console.log(err);
+        }
+        if (req.user.active_request) {
+            var request = Request.findById(req.user._id);
+            res.render('user', {
+                'user' : req.user, 
+                'request_filed' : false,
+                'request' : request,
+                'teachers' : teachers
+            });
+        }
+        else {
+            res.render('user', {
+                'user' : req.user, 
+                'request_filed' : false,
+                'teachers' : teachers
+            });
+        }
     });
+    
     console.log(req.user);
 });
 
 app.post('/dashboard', function (req, res) {
+    teacherId = new Schema.Types.ObjectId(req.param('teacher_id'))
+
     //file the new request
-    var pending = new Request({
+    var pending = new Request( {
         'user_id': req.user._id,
-        //'teacher_id': "",
+        'teacher_id': teacherId,
         'date': new Date()
     });
     pending.save(function (err) {
@@ -159,9 +171,10 @@ app.post('/dashboard', function (req, res) {
     );
     
     //tell the teacher
-    //var teacher = 
-
-    res.render('user', { 'user' : req.user, 'request_filed' : true, 'request' : pending });
+    Teacher.update({ _id: id }, { $push: { 'requestIds' : teacherId } }, function (err, raw) {
+        return console.error(err);
+    });
+    res.render('user', { 'user' : req.user, 'request_filed' : true, 'request' : pending, 'teachers' : teachers });
 });
 
 
