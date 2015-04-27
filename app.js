@@ -31,13 +31,13 @@ var UserDetail = new Schema(
         username: String, 
         password: String,
         requestActive: Boolean,
-        request_id: Schema.Types.ObjectId
+        request_id: { type: Schema.Types.ObjectId, ref: 'Request' }   
     },
     { collection: 'users' });
 var RequestDetail = new Schema(
     {
-        user_id: Schema.Types.ObjectId,
-        teacher_id: Schema.Types.ObjectId,
+        user_id: { type: Schema.Types.ObjectId, ref: 'User' },
+        teacher_id: { type: Schema.Types.ObjectId, ref: 'Teacher' },
         date: Date
     },
     { collection: 'requests' }
@@ -47,15 +47,15 @@ var TeacherDetail = new Schema(
         name: String,
         username: String,
         password: String,
-        requestIds: [Schema.Types.ObjectId]
+        requestIds: [{type: Schema.Types.ObjectId, ref: 'Request'}]
     },
     { collection: 'teachers' }
 );
 
 
-var User = mongoose.model('users', UserDetail);
-var Request = mongoose.model('requests', RequestDetail);
-var Teacher = mongoose.model('teachers', TeacherDetail);
+var User = mongoose.model('User', UserDetail);
+var Request = mongoose.model('Request', RequestDetail);
+var Teacher = mongoose.model('Teacher', TeacherDetail);
 
 
 
@@ -123,11 +123,19 @@ app.use('/', route);
 //handlers!
 
 app.get('/dashboard', function (req, res) {
-    Teacher.find({}, function (err, teachers) {
-        if (err) {
-            return console.log(err);
-        }
-        if (req.user.active_request) {
+    User.findById(req.user._id, 'requestActive', function (err, active) {
+        if (active) Request.findById(req.user.request_id, function (err, request) {
+            if (err) return console.log(err);
+            res.render('user', {
+                'user' : req.user, 
+                'request_filed' : true,
+                'request' : request
+            });
+            console.log(request);
+        });
+        else Teacher.find({}, function (err, teachers) {
+            if (err) return console.log(err);
+            
             var request = Request.findById(req.user._id);
             res.render('user', {
                 'user' : req.user, 
@@ -135,21 +143,13 @@ app.get('/dashboard', function (req, res) {
                 'request' : request,
                 'teachers' : teachers
             });
-        }
-        else {
-            res.render('user', {
-                'user' : req.user, 
-                'request_filed' : false,
-                'teachers' : teachers
-            });
-        }
+        });
     });
-    
     console.log(req.user);
 });
 
 app.post('/dashboard', function (req, res) {
-    teacherId = new Schema.Types.ObjectId(req.param('teacher_id'))
+    var teacherId = new Schema.Types.ObjectId(req.param('teacher_id'))
 
     //file the new request
     var pending = new Request( {
@@ -164,7 +164,7 @@ app.post('/dashboard', function (req, res) {
     //put the request on the user's record
     User.update(
         { '_id': req.user._id }, 
-        { $set: { 'request_id': pending._id } },
+        { $set: { 'request_id': pending._id , 'requestActive' : true} },
         function (err) {
             if (err) return console.error(err);
         }
