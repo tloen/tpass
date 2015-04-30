@@ -24,44 +24,8 @@ var db = require('./db')
 mongoose.connect(db.url);
 var Schema = mongoose.Schema;
 
-//defining schemata
-var UserDetail = new Schema(
-    {
-        _id: Number,
-        name: String,
-        username: String, 
-        password: String,
-        requestActive: Boolean,
-        homeroom: {type: Number, ref: 'Teacher'},
-        request_id: { type: Number, ref: 'Request' }
-    },
-    { collection: 'users' });
-var RequestDetail = new Schema(
-    {
-        _id: Number,
-        user_id: { type: Number, ref: 'User' },
-        teacher_id: { type: Number, ref: 'Teacher' },
-        date: Date
-    },
-    { collection: 'requests' }
-);
-var TeacherDetail = new Schema(
-    {
-        _id: Number,
-        name: String,
-        username: String,
-        password: String,
-        requestIds: [{type: Number, ref: 'Request'}]
-    },
-    { collection: 'teachers' }
-);
-
-
-var User = mongoose.model('User', UserDetail);
-var Request = mongoose.model('Request', RequestDetail);
-var Teacher = mongoose.model('Teacher', TeacherDetail);
-
-
+var User = db.User;
+var Request = db.Request;
 
 // passport session setup
 passport.serializeUser(function (user, done) {
@@ -78,21 +42,21 @@ passport.deserializeUser(function (user, done) {
 
 // local strategy
 passport.use(new LocalStrategy(
-  function (username, password, done) {
-      console.log('authentication in progress');
-      process.nextTick(function () {
-          User.findOne({ 'username': username }, function (err, user) {
-              if (err) { return done(err); } //server exception
-              if (!user) {
-                  return done(null, false, { message: 'Incorrect username.' });
-              }
-              if (user.password != password) {
-                  return done(null, false, { message: 'Incorrect password.' });
-              }
-              return done(null, user); //passed
-          });
-      })
-  }
+    function (username, password, done) {
+        console.log('authentication in progress');
+        process.nextTick(function () {
+            User.findOne({ 'username': username }, function (err, user) {
+                if (err) { return done(err); } //server exception
+                if (!user) {
+                    return done(null, false, { message: 'Incorrect username.' });
+                }
+                if (user.password != password) {
+                    return done(null, false, { message: 'Incorrect password.' });
+                }
+                return done(null, user); //passed
+            });
+        })
+    }
 ));
 
 var app = express();
@@ -127,31 +91,59 @@ app.use('/', route);
 //handlers!
 
 app.get('/register', function (req, res) {
+    //todo: optimize
+    User.find({'isTeacher' : true}, function (err, teachers) {
+        //displays drop-down menu of teachers
+        if (err) return console.log(err);
+        res.render('register', { 'teachers' : teachers });
+    });
+});
 
+app.post('/register', function (req, res) {
+    //todo: test uniqueness
+    var newguy = new User({
+        name: req.param('firstname') + ' ' + req.param('lastname'),
+        username: req.param('username'),
+        password: req.param('password'),
+        studentId: req.param('sid'),
+        isTeacher: false,
+        requestActive: false,
+        homeroom: req.param('homeroom')
+    });
+    newguy.save(function (err) {
+        if (err) return console.error(err);
+    });
+    res.redirect('/login');
 });
 
 app.get('/dashboard', function (req, res) {
-    User.findById(req.user._id, 'requestActive', function (err, active) {
-        if (active) Request.findById(req.user.request_id, function (err, request) {
-            if (err) return console.log(err);
-            res.render('user', {
-                'user' : req.user, 
-                'request_filed' : true,
-                'request' : request
+    console.log(req.user);
+    User.findById(req.user._id, function (err, user) {
+        if (!user.isTeacher) {
+            //todo: populate
+            if (user.requestActive) Request.findById(req.user.studentRequestId, function (err, request) {
+                if (err) return console.log(err);
+                res.render('user', {
+                    'user' : req.user, 
+                    'request_filed' : true,
+                    'request' : request
+                });
+                console.log(request);
             });
-            console.log(request);
-        });
-        else Teacher.find({}, function (err, teachers) {
-            if (err) return console.log(err);
-            
-            var request = Request.findById(req.user._id);
-            res.render('user', {
-                'user' : req.user, 
-                'request_filed' : false,
-                'request' : request,
-                'teachers' : teachers
+            else User.find({ 'isTeacher': true }, function (err, teachers) {
+                //displays drop-down menu of teachers
+                if (err) return console.log(err);
+                res.render('user', {
+                    'user' : req.user, 
+                    'request_filed' : false,
+                    'request' : request,
+                    'teachers' : teachers
+                });
             });
-        });
+        }
+        else {
+            //todo: teacher dashboard
+        }
     });
     console.log(req.user);
 });
@@ -172,14 +164,19 @@ app.post('/dashboard', function (req, res) {
     //put the request on the user's record
     User.update(
         { '_id': req.user._id }, 
-        { $set: { 'request_id': pending._id , 'requestActive' : true} },
+        {
+            $set: {
+                'studentRequestId': pending._id, 
+                'requestActive' : true
+            }
+        },
         function (err) {
             if (err) return console.error(err);
         }
     );
     
     //tell the teacher
-    Teacher.update({ _id: teacherId }, { $push: { 'requestIds' : teacherId } }, function (err, raw) {
+    User.update({ _id: teacherId }, { $push: { 'teacherRequestIds' : pending._id } }, function (err, raw) {
         return console.error(err);
     });
     res.render('user', { 'user' : req.user, 'request_filed' : true, 'request' : pending });

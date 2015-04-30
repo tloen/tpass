@@ -9,9 +9,9 @@ block content
         form(method="POST")
             p Alternate Teacher:
             input(type="text", name="alternate", value="Appleman")
-            select
+            select(name="teacher_id")
                 each teacher in teachers
-                    option(value=teacher._id, name="teacher_id")=teacher.name
+                    option(value=teacher._id)=teacher.name
             input(type="submit", name="pass_action", value="Submit")
         ul
 

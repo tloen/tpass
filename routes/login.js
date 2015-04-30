@@ -3,6 +3,7 @@ var router = express.Router();
 
 // okay, the following code is copied from the website 
 // http://passportjs.org/guide/username-password/
+
 var passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy;
 
