@@ -90,6 +90,11 @@ app.use('/', route);
 
 //handlers!
 
+app.get('/logout', function (req, res) {
+    req.logout();
+    res.redirect('/');
+});
+
 app.get('/register', function (req, res) {
     //todo: optimize
     User.find({'isTeacher' : true}, function (err, teachers) {
@@ -136,7 +141,6 @@ app.get('/dashboard', function (req, res) {
                 res.render('user', {
                     'user' : req.user, 
                     'request_filed' : false,
-                    'request' : request,
                     'teachers' : teachers
                 });
             });
