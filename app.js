@@ -27,27 +27,31 @@ var Schema = mongoose.Schema;
 //defining schemata
 var UserDetail = new Schema(
     {
+        _id: Number,
         name: String,
         username: String, 
         password: String,
         requestActive: Boolean,
-        request_id: { type: Schema.Types.ObjectId, ref: 'Request' }   
+        homeroom: {type: Number, ref: 'Teacher'},
+        request_id: { type: Number, ref: 'Request' }
     },
     { collection: 'users' });
 var RequestDetail = new Schema(
     {
-        user_id: { type: Schema.Types.ObjectId, ref: 'User' },
-        teacher_id: { type: Schema.Types.ObjectId, ref: 'Teacher' },
+        _id: Number,
+        user_id: { type: Number, ref: 'User' },
+        teacher_id: { type: Number, ref: 'Teacher' },
         date: Date
     },
     { collection: 'requests' }
 );
 var TeacherDetail = new Schema(
     {
+        _id: Number,
         name: String,
         username: String,
         password: String,
-        requestIds: [{type: Schema.Types.ObjectId, ref: 'Request'}]
+        requestIds: [{type: Number, ref: 'Request'}]
     },
     { collection: 'teachers' }
 );
@@ -122,6 +126,10 @@ app.use('/', route);
 
 //handlers!
 
+app.get('/register', function (req, res) {
+
+});
+
 app.get('/dashboard', function (req, res) {
     User.findById(req.user._id, 'requestActive', function (err, active) {
         if (active) Request.findById(req.user.request_id, function (err, request) {
@@ -149,7 +157,7 @@ app.get('/dashboard', function (req, res) {
 });
 
 app.post('/dashboard', function (req, res) {
-    var teacherId = new Schema.Types.ObjectId(req.param('teacher_id'))
+    var teacherId = req.param('teacher_id');
 
     //file the new request
     var pending = new Request( {

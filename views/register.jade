@@ -1,0 +1,16 @@
+extends layout
+
+block content
+	h1= title
+	form(method="POST")
+        p Username:
+        input(type="text", name="username", value="Bearcat")
+		p First Name:
+		input(type="text", name="firstname", value="Bearcat")
+		p Last Name:
+		input(type="text", name="lastname", value="Prime")
+		p Homeroom Teacher:
+		input(type="text", name="homeroom", value="Appleman")
+		p Student ID:
+		input(type="text", name="sid", value="1234567")
+		input(type="submit", name="pass_action", value="Submit")

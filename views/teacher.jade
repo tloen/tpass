@@ -1,0 +1,42 @@
+extends layout
+
+block content
+    h1= title
+    p This is not ready.
+    p="Username: "+user.username
+
+    ul
+		table(border="1",style="width:100%")
+			tr
+				td
+					p Name
+				td
+					p Homeroom
+				td
+					p Alternate
+				td
+					p Student ID
+				td
+					p Approve
+				td
+					p Deny
+			each student in request_students
+				tr
+					td
+						p=request.firstname
+					td
+						p=request.lastname
+					td
+						p=request.homeroom
+					td
+						p=request.alternate
+					td
+						p=request.sid
+					td
+						form(method="POST")
+							input(type="hidden", name="id", value=request._id)
+							input(type="submit", name="pass_action", value="Accept")
+					td
+						form(method="POST")
+							input(type="hidden", name="id", value=request._id)
+							input(type="submit", name="pass_action", value="Deny")
