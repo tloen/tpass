@@ -123,10 +123,15 @@ app.post('/register', function (req, res) {
 
 app.get('/dashboard', function (req, res) {
     console.log(req.user);
-    User.findById(req.user._id, function (err, user) {
+    User
+    .findById(req.user._id)
+    .populate('teacherRequestIds')
+    .exec(function (err, user) {
+        console.log(user);
         if (!user.isTeacher) {
-            //todo: populate
-            if (user.requestActive) Request.findById(req.user.studentRequestId, function (err, request) {
+            if (user.requestActive) Request.findById(req.user.studentRequestId)
+                .populate('teacher_id')
+                .exec(function (err, request) {
                 if (err) return console.log(err);
                 res.render('user', {
                     'user' : req.user, 
@@ -145,9 +150,13 @@ app.get('/dashboard', function (req, res) {
                 });
             });
         }
-        else {
-            //todo: teacher dashboard
-        }
+        else User.find({ 'isTeacher': true }, function (err, teachers) {
+            res.render('teacher', {
+                'user' : req.user,
+                'request_students' : user.teacherRequestIds,
+                'teachers' : teachers
+            });
+        });
     });
     console.log(req.user);
 });
